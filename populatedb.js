@@ -15,7 +15,10 @@ var Book = require('./models/book')
 var Author = require('./models/author')
 var Genre = require('./models/genre')
 var BookInstance = require('./models/bookinstance')
-
+var Country = require('./models/country')
+var Language = require('./models/language')
+var Edition = require('./models/edition')
+var Editorial = require('./models/editorial')
 
 var mongoose = require('mongoose');
 var mongoDB = userArgs[0];
@@ -28,9 +31,17 @@ var authors = []
 var genres = []
 var books = []
 var bookinstances = []
+var country = []
+var language = []
+var edition = []
+var editorial = []
 
-function authorCreate(first_name, family_name, d_birth, d_death, cb) {
-  authordetail = {first_name:first_name , family_name: family_name }
+function authorCreate(first_name, family_name, d_birth, d_death, country, cb) {
+  authordetail = {
+    first_name:first_name,
+    family_name: family_name,
+    country: country
+  }
   if (d_birth != false) authordetail.date_of_birth = d_birth
   if (d_death != false) authordetail.date_of_death = d_death
   
@@ -104,23 +115,97 @@ function bookInstanceCreate(book, imprint, due_back, status, cb) {
   }  );
 }
 
+function countryCreate(name, cb) {
+  countrydetail = { 
+    name: name
+  }    
+  var country = new Country(countrydetail);    
+  country.save(function (err) {
+    if (err) {
+      console.log('ERROR CREATING Country: ' + country);
+      cb(err, null)
+      return
+    }
+    console.log('New Country: ' + country);
+    country.push(country)
+    cb(null, country)
+  }  );
+}
+
+function languageCreate(name, cb) {
+  languagedetail = { 
+    name: name
+  }    
+
+  var language = new Language(language);    
+  language.save(function (err) {
+    if (err) {
+      console.log('ERROR CREATING Language: ' + language);
+      cb(err, null)
+      return
+    }
+    console.log('New Language: ' + language);
+    language.push(language)
+    cb(null, language)
+  }  );
+}
+
+function editionCreate(book, editorial, year, language, cb) {
+  editiondetail = { 
+    book: book,
+    editorial: editorial,
+    year: year
+  }    
+
+  if (language != false) bookdetail.language = language
+
+  var edition = new Edition(edition);    
+  edition.save(function (err) {
+    if (err) {
+      console.log('ERROR CREATING Edition: ' + edition);
+      cb(err, null)
+      return
+    }
+    console.log('New Edition: ' + edition);
+    edition.push(edition)
+    cb(null, edition)
+  }  );
+}
+
+function editorialCreate(name, country, cb) {
+  editorialdetail = { 
+    name: name,
+    country: country
+  }    
+  var editorial = new Editorial(editorial);    
+  editorial.save(function (err) {
+    if (err) {
+      console.log('ERROR CREATING Editorial: ' + editorial);
+      cb(err, null)
+      return
+    }
+    console.log('New Editorial: ' + editorial);
+    editorial.push(editorial)
+    cb(null, editorial)
+  }  );
+}
 
 function createGenreAuthors(cb) {
     async.series([
         function(callback) {
-          authorCreate('Patrick', 'Rothfuss', '1973-06-06', false, callback);
+          authorCreate('Patrick', 'Rothfuss', '1973-06-06', false, country[0],callback);//country[0] USA
         },
         function(callback) {
-          authorCreate('Ben', 'Bova', '1932-11-8', false, callback);
+          authorCreate('Ben', 'Bova', '1932-11-8', false, country[1], callback);//country[1] Russia
         },
         function(callback) {
-          authorCreate('Isaac', 'Asimov', '1920-01-02', '1992-04-06', callback);
+          authorCreate('Isaac', 'Asimov', '1920-01-02', '1992-04-06', country[0], callback);
         },
         function(callback) {
-          authorCreate('Bob', 'Billings', false, false, callback);
+          authorCreate('Bob', 'Billings', country[2], false, false, callback);//country[2] UK
         },
         function(callback) {
-          authorCreate('Jim', 'Jones', '1971-12-16', false, callback);
+          authorCreate('Jim', 'Jones', '1971-12-16', country[0], false, callback);
         },
         function(callback) {
           genreCreate("Fantasy", callback);
@@ -206,7 +291,36 @@ function createBookInstances(cb) {
         cb);
 }
 
-
+function createGenreAuthors(cb) {
+    async.series([
+        function(callback) {
+          authorCreate('Patrick', 'Rothfuss', '1973-06-06', false, country[0],callback);//country[0] USA
+        },
+        function(callback) {
+          authorCreate('Ben', 'Bova', '1932-11-8', false, country[1], callback);//country[1] Russia
+        },
+        function(callback) {
+          authorCreate('Isaac', 'Asimov', '1920-01-02', '1992-04-06', country[0], callback);
+        },
+        function(callback) {
+          authorCreate('Bob', 'Billings', country[2], false, false, callback);//country[2] UK
+        },
+        function(callback) {
+          authorCreate('Jim', 'Jones', '1971-12-16', country[0], false, callback);
+        },
+        function(callback) {
+          genreCreate("Fantasy", callback);
+        },
+        function(callback) {
+          genreCreate("Science Fiction", callback);
+        },
+        function(callback) {
+          genreCreate("French Poetry", callback);
+        },
+        ],
+        // optional callback
+        cb);
+}
 
 async.series([
     createGenreAuthors,
