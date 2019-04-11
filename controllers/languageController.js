@@ -1,6 +1,7 @@
 var Language = require('../models/language');
 var Book = require('../models/book');
 var Edition = require('../models/edition');
+var Editorial = require('../models/editorial');
 var async = require('async');
 
 const { body,validationResult } = require('express-validator/check');
@@ -32,7 +33,7 @@ exports.language_detail = function(req, res, next) {
         language_edition: function(callback) {
           Edition.find({ 'language': req.params.id })
           .populate('book')
-          .populate('edition')
+          .populate('editorial')
           .exec(callback);
         },
 

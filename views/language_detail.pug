@@ -6,13 +6,16 @@ block content
   
   div(style='margin-left:20px;margin-top:20px')
 
-    h4 Editions
+    h4 Books
     
     dl
       each edition in language_edition
         dt 
-          a(href=edition.book.url) #{edition.book.title}
-        dd #{edition.book.summary}
+          p #[strong Title:] 
+            a(href=edition.book.url) #{edition.book.title} 
+          p #[strong Editorial:] #{edition.editorial.name} 
+          p #[strong Year:] #{edition.year_formatted}
+          br
 
       else
         p This language has no books
