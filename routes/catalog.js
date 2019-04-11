@@ -7,8 +7,8 @@ var author_controller = require('../controllers/authorController');
 var genre_controller = require('../controllers/genreController');
 var book_instance_controller = require('../controllers/bookinstanceController');
 var country_controller = require('../controllers/countryController');
-var edition_controller = require('../controllers/EditionController');
-var editorial_controller = require('../controllers/EditorialController');
+var edition_controller = require('../controllers/editionController');
+var editorial_controller = require('../controllers/editorialController');
 var language_controller = require('../controllers/languageController');
 /// BOOK ROUTES ///
 
@@ -141,7 +141,7 @@ router.post('/country/:id/update', country_controller.country_update_post);
 router.get('/country/:id', country_controller.country_detail);
 
 // GET request for list of all Country.
-router.get('/country', country_controller.country_list);
+router.get('/countries', country_controller.country_list);
 
 /// EDITION ROUTES ///
 
@@ -167,7 +167,7 @@ router.post('/edition/:id/update', edition_controller.edition_update_post);
 router.get('/edition/:id', edition_controller.edition_detail);
 
 // GET request for list of all Edition.
-router.get('/edition', edition_controller.edition_list);
+router.get('/editions', edition_controller.edition_list);
 
 /// EDITORIAL ROUTES ///
 
@@ -193,7 +193,7 @@ router.post('/editorial/:id/update', editorial_controller.editorial_update_post)
 router.get('/editorial/:id', editorial_controller.editorial_detail);
 
 // GET request for list of all Editorial.
-router.get('/editorial', editorial_controller.editorial_list);
+router.get('/editorials', editorial_controller.editorial_list);
 
 /// LANGUAGE ROUTES ///
 
@@ -219,6 +219,6 @@ router.post('/language/:id/update', language_controller.language_update_post);
 router.get('/language/:id', language_controller.language_detail);
 
 // GET request for list of all Language.
-router.get('/language', language_controller.language_list);
+router.get('/languages', language_controller.language_list);
 
 module.exports = router;
