@@ -29,8 +29,10 @@ exports.language_detail = function(req, res, next) {
               .exec(callback);
         },
 
-        genre_books: function(callback) {
-          Book.find({ 'genre': req.params.id })
+        language_edition: function(callback) {
+          Edition.find({ 'language': req.params.id })
+          .populate('book')
+          .populate('edition')
           .exec(callback);
         },
 
@@ -42,7 +44,7 @@ exports.language_detail = function(req, res, next) {
             return next(err);
         }
         // Successful, so render.
-        res.render('language_detail', { title: 'Language Detail', language: results.language, genre_books: results.genre_books } );
+        res.render('language_detail', { title: 'Language Detail', language: results.language, language_edition: results.language_edition } );
     });
 
 };

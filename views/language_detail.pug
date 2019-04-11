@@ -2,17 +2,17 @@ extends layout
 
 block content
 
-  h1 Genre: #{genre.name}
+  h1 Language: #{language.name}
   
   div(style='margin-left:20px;margin-top:20px')
 
-    h4 Books
+    h4 Editions
     
     dl
-      each book in genre_books
+      each edition in language_edition
         dt 
-          a(href=book.url) #{book.title}
-        dd #{book.summary}
+          a(href=edition.book.url) #{edition.book.title}
+        dd #{edition.book.summary}
 
       else
-        p This genre has no books
+        p This language has no books
