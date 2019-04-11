@@ -47,12 +47,16 @@ exports.author_detail = function (req, res, next) {
 
 // Display Author create form on GET.
 exports.author_create_get = function (req, res, next) {
-    Country.find()
-        .exec(function (err, list_country) {
-            if (err) { return next(err); }
-            // Successful, so render.
-            res.render('author_form', { title: 'Create Author', country_list: list_country });
-        })
+    async.parallel({
+        countries: function(callback) {
+            Country.find(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        //console.log(results.countries);
+        res.render('author_form', { title: 'Create Author', countries:results.countries });
+    });
+    //res.render('author_form', { title: 'Create Author' });
 };
 
 // Handle Author create on POST.
@@ -65,12 +69,14 @@ exports.author_create_post = [
         .isAlphanumeric().withMessage('Family name has non-alphanumeric characters.'),
     body('date_of_birth', 'Invalid date of birth').optional({ checkFalsy: true }).isISO8601(),
     body('date_of_death', 'Invalid date of death').optional({ checkFalsy: true }).isISO8601(),
+    body('country', 'Country must not be empty.').isLength({ min: 1 }).trim(),
 
     // Sanitize fields.
     sanitizeBody('first_name').escape(),
     sanitizeBody('family_name').escape(),
     sanitizeBody('date_of_birth').toDate(),
     sanitizeBody('date_of_death').toDate(),
+    sanitizeBody('country').escape(),
 
     // Process request after validation and sanitization.
     (req, res, next) => {
@@ -85,6 +91,7 @@ exports.author_create_post = [
                 family_name: req.body.family_name,
                 date_of_birth: req.body.date_of_birth,
                 date_of_death: req.body.date_of_death,
+                country: req.body.country,
             }
         );
 
@@ -162,18 +169,22 @@ exports.author_delete_post = function (req, res, next) {
 
 // Display Author update form on GET.
 exports.author_update_get = function (req, res, next) {
-
-    Author.findById(req.params.id, function (err, author) {
-        if (err) { return next(err); }
-        if (author == null) { // No results.
-            var err = new Error('Author not found');
-            err.status = 404;
-            return next(err);
-        }
-        // Success.
-        res.render('author_form', { title: 'Update Author', author: author });
-
-    });
+    async.parallel({
+        author: function(callback) {
+            Author.findById(req.params.id).populate('country').exec(callback);
+        },
+        countries: function(callback) {
+            Country.find(callback);
+        },
+        }, function(err, results) {
+            if (err) { return next(err); }
+            if (results.author==null) { // No results.
+                var err = new Error('Author not found');
+                err.status = 404;
+                return next(err);
+            }
+            res.render('author_form', { title: 'Update Author', author:results.author, countries:results.countries });
+        });
 };
 
 // Handle Author update on POST.
@@ -186,12 +197,14 @@ exports.author_update_post = [
         .isAlphanumeric().withMessage('Family name has non-alphanumeric characters.'),
     body('date_of_birth', 'Invalid date of birth').optional({ checkFalsy: true }).isISO8601(),
     body('date_of_death', 'Invalid date of death').optional({ checkFalsy: true }).isISO8601(),
+    body('country', 'Country must not be empty.').isLength({ min: 1 }).trim(),
 
     // Sanitize fields.
     sanitizeBody('first_name').escape(),
     sanitizeBody('family_name').escape(),
     sanitizeBody('date_of_birth').toDate(),
     sanitizeBody('date_of_death').toDate(),
+    sanitizeBody('country').escape(),
 
     // Process request after validation and sanitization.
     (req, res, next) => {
@@ -206,6 +219,7 @@ exports.author_update_post = [
                 family_name: req.body.family_name,
                 date_of_birth: req.body.date_of_birth,
                 date_of_death: req.body.date_of_death,
+                country: req.body.country,
                 _id: req.params.id
             }
         );
