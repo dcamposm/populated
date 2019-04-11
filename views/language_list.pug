@@ -4,8 +4,8 @@ block content
   h1= title
   
   ul
-    each genre in genre_list
+    each language in language_list
       li 
-        a(href=genre.url) #{genre.name}
+        a(href=language.url) #{language.name}
     else
-      li There are no genres.
+      li There are no languages.
