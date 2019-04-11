@@ -1,6 +1,7 @@
 var Author = require('../models/author')
 var async = require('async')
 var Book = require('../models/book')
+var Country = require('../models/country')
 
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
@@ -24,6 +25,7 @@ exports.author_detail = function (req, res, next) {
     async.parallel({
         author: function (callback) {
             Author.findById(req.params.id)
+                .populate('country')
                 .exec(callback)
         },
         authors_books: function (callback) {
@@ -45,7 +47,12 @@ exports.author_detail = function (req, res, next) {
 
 // Display Author create form on GET.
 exports.author_create_get = function (req, res, next) {
-    res.render('author_form', { title: 'Create Author' });
+    Country.find()
+        .exec(function (err, list_country) {
+            if (err) { return next(err); }
+            // Successful, so render.
+            res.render('author_form', { title: 'Create Author', country_list: list_country });
+        })
 };
 
 // Handle Author create on POST.
