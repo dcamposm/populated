@@ -61,7 +61,7 @@ exports.country_create_get = function(req, res, next) {
 exports.country_create_post = [
 
     // Validate that the name field is not empty.
-    body('name', 'Genre name required').isLength({ min: 1 }).trim(),
+    body('name', 'Country name required').isLength({ min: 1 }).trim(),
 
     // Sanitize (trim) the name field.
     sanitizeBody('name').escape(),
@@ -72,35 +72,35 @@ exports.country_create_post = [
         // Extract the validation errors from a request.
         const errors = validationResult(req);
 
-        // Create a genre object with escaped and trimmed data.
-        var genre = new Genre(
+        // Create a country object with escaped and trimmed data.
+        var country = new Country(
           { name: req.body.name }
         );
 
 
         if (!errors.isEmpty()) {
             // There are errors. Render the form again with sanitized values/error messages.
-            res.render('genre_form', { title: 'Create Genre', genre: genre, errors: errors.array()});
-            
+            res.render('country_form', { title: 'Create Country', country: country, errors: errors.array()});
+
             return;
         }
         else {
             // Data from form is valid.
-            // Check if Genre with same name already exists.
-            Genre.findOne({ 'name': req.body.name })
-                .exec( function(err, found_genre) {
+            // Check if Country with same name already exists.
+            Country.findOne({ 'name': req.body.name })
+                .exec( function(err, found_country) {
                      if (err) { return next(err); }
 
-                     if (found_genre) {
-                         // Genre exists, redirect to its detail page.
-                         res.redirect(found_genre.url);
+                     if (found_country) {
+                         // Country exists, redirect to its detail page.
+                         res.redirect(found_country.url);
                      }
                      else {
 
-                         genre.save(function (err) {
+                         country.save(function (err) {
                            if (err) { return next(err); }
-                           // Genre saved. Redirect to genre detail page.
-                           res.redirect(genre.url);
+                           // Country saved. Redirect to country detail page.
+                           res.redirect(country.url);
                          });
 
                      }
@@ -111,17 +111,42 @@ exports.country_create_post = [
 ];
 
 // Display Country delete form on GET.
-exports.country_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Country delete GET');
+exports.country_delete_get = function(req, res, next) {
+
+    async.parallel({
+        country: function(callback) {
+            Genre.findById(req.params.id).exec(callback);
+        },
+        country_books: function(callback) {
+            Book.find({ 'country': req.params.id }).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        // Success
+        if (results.country_books.length > 0) {
+            // Country has books. Render in same way as for GET route.
+            res.render('country_delete', { title: 'Delete Country', country: results.country, country_books: results.country_books } );
+            return;
+        }
+        else {
+            // Country has no books. Delete object and redirect to the list of countries.
+            Country.findByIdAndRemove(req.body.id, function deleteGenre(err) {
+                if (err) { return next(err); }
+                // Success - go to countries list.
+                res.redirect('/catalog/countries');
+            });
+
+        }
+    });
 };
 
 // Handle Country delete on POST.
-exports.country_delete_post = function(req, res) {
+exports.country_delete_post = function(req, res, next) {
     res.send('NOT IMPLEMENTED: Country delete POST');
 };
 
 // Display Country update form on GET.
-exports.country_update_get = function(req, res) {
+exports.country_update_get = function(req, res, next) {
     res.send('NOT IMPLEMENTED: Country update GET');
 };
 
