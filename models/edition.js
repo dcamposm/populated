@@ -8,7 +8,7 @@ var EditionSchema = new Schema(
     book: {type: Schema.Types.ObjectId, ref: 'Book', required: true},
     editorial: {type: Schema.Types.ObjectId, ref: 'Editorial', required: true},
     year: {type: Date},
-    languages: [{type: Schema.Types.ObjectId, ref: 'Language'}]
+    language: [{type: Schema.Types.ObjectId, ref: 'Language'}]
   }
 );
 
