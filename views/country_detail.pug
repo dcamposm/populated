@@ -1,0 +1,29 @@
+extends layout
+
+block content
+
+  h1 Country: #{country.name}
+  
+  div(style='margin-left:20px;margin-top:20px')
+
+    h4 Authors
+    
+    dl
+      each author in country_authors
+        dt 
+          a(href=author.url) #{author.name}
+        
+      else
+        p This country has no authors
+
+    hr
+
+    h4 Editorials
+    
+    dl
+      each editorial in country_editorials
+        dt 
+          a(href=editorial.url) #{editorial.name}
+        
+      else
+        p This country has no editorial 

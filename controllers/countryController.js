@@ -1,4 +1,8 @@
 var Country = require('../models/country');
+var Author = require('../models/author');
+var Editorial = require('../models/editorial');
+var async = require('async');
+
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
 // Display list of all Country.
@@ -113,25 +117,32 @@ exports.country_create_post = [
 
 // Display Country delete form on GET.
 exports.country_delete_get = function(req, res, next) {
-
     async.parallel({
         country: function(callback) {
-            Genre.findById(req.params.id).exec(callback);
+            Country.findById(req.params.id).exec(callback);
         },
-        country_books: function(callback) {
-            Book.find({ 'country': req.params.id }).exec(callback);
+        country_authors: function(callback) {
+            Author.find({ 'country': req.params.id }).exec(callback);
+        },
+        country_editorials: function(callback) {
+            Editorial.find({ 'country': req.params.id }).exec(callback);
         },
     }, function(err, results) {
         if (err) { return next(err); }
-        // Success
-        if (results.country_books.length > 0) {
+        // Success ///////////////////////////////////////////////////////////// si n0o hay autores ni editoriales
+        if ( ( results.country_authors.length > 0 ) || ( results.country_editorials.length > 0 ) ) {
             // Country has books. Render in same way as for GET route.
-            res.render('country_delete', { title: 'Delete Country', country: results.country, country_books: results.country_books } );
+            res.render('country_delete', {
+                        title: 'Delete Country',
+                        country: results.country,
+                        country_authors: results.country_authors,
+                        country_editorials: results.country_editorials
+                    });
             return;
         }
         else {
             // Country has no books. Delete object and redirect to the list of countries.
-            Country.findByIdAndRemove(req.body.id, function deleteGenre(err) {
+            Country.findByIdAndRemove(req.body.id, function deleteAuthor(err) {
                 if (err) { return next(err); }
                 // Success - go to countries list.
                 res.redirect('/catalog/countries');
@@ -143,7 +154,31 @@ exports.country_delete_get = function(req, res, next) {
 
 // Handle Country delete on POST.
 exports.country_delete_post = function(req, res, next) {
-    res.send('NOT IMPLEMENTED: Country delete POST');
+    async.parallel({
+        genre: function(callback) {
+            Genre.findById(req.params.id).exec(callback);
+        },
+        country_authors: function(callback) {
+            Book.find({ 'genre': req.params.id }).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        // Success
+        if (results.genre_books.length > 0) {
+            // Genre has books. Render in same way as for GET route.
+            res.render('genre_delete', { title: 'Delete Genre', genre: results.genre, genre_books: results.genre_books } );
+            return;
+        }
+        else {
+            // Genre has no books. Delete object and redirect to the list of genres.
+            Genre.findByIdAndRemove(req.body.id, function deleteGenre(err) {
+                if (err) { return next(err); }
+                // Success - go to genres list.
+                res.redirect('/catalog/genres');
+            });
+
+        }
+    });
 };
 
 // Display Country update form on GET.
