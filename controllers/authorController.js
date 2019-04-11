@@ -47,12 +47,16 @@ exports.author_detail = function (req, res, next) {
 
 // Display Author create form on GET.
 exports.author_create_get = function (req, res, next) {
-    Country.find()
-        .exec(function (err, list_country) {
-            if (err) { return next(err); }
-            // Successful, so render.
-            res.render('author_form', { title: 'Create Author', country_list: list_country });
-        })
+    async.parallel({
+        countries: function(callback) {
+            Country.find(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        //console.log(results.countries);
+        res.render('author_form', { title: 'Create Author', countries:results.countries });
+    });
+    //res.render('author_form', { title: 'Create Author' });
 };
 
 // Handle Author create on POST.
