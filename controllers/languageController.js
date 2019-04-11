@@ -1,5 +1,6 @@
 var Language = require('../models/language');
 var Book = require('../models/book');
+var Edition = require('../models/edition');
 var async = require('async');
 
 const { body,validationResult } = require('express-validator/check');
@@ -19,8 +20,31 @@ exports.language_list = function(req, res, next) {
 };
 
 // Display detail page for a specific Language.
-exports.language_detail = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language detail: ' + req.params.id);
+exports.language_detail = function(req, res, next) {
+
+    async.parallel({
+        language: function(callback) {
+
+            Language.findById(req.params.id)
+              .exec(callback);
+        },
+
+        genre_books: function(callback) {
+          Book.find({ 'genre': req.params.id })
+          .exec(callback);
+        },
+
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.language==null) { // No results.
+            var err = new Error('Language not found');
+            err.status = 404;
+            return next(err);
+        }
+        // Successful, so render.
+        res.render('language_detail', { title: 'Language Detail', language: results.language, genre_books: results.genre_books } );
+    });
+
 };
 
 // Display Language create form on GET.
