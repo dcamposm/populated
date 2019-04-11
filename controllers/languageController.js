@@ -1,8 +1,21 @@
 var Language = require('../models/language');
+var Book = require('../models/book');
+var async = require('async');
+
+const { body,validationResult } = require('express-validator/check');
+const { sanitizeBody } = require('express-validator/filter');
 
 // Display list of all Language.
-exports.language_list = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language list');
+exports.language_list = function(req, res, next) {
+
+    Language.find()
+    .sort([['name', 'ascending']])
+    .exec(function (err, list_languages) {
+      if (err) { return next(err); }
+      // Successful, so render.
+      res.render('language_list', { title: 'Language List', language_list:  list_languages});
+    });
+
 };
 
 // Display detail page for a specific Language.
