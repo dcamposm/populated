@@ -1,41 +1,41 @@
-var Language = require('../models/language');
+var Editorial = require('../models/editorial');
 
-// Display list of all Language.
-exports.language_list = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language list');
+// Display list of all Editorial.
+exports.editorial_list = function(req, res) {
+    res.send('NOT IMPLEMENTED: Editorial list');
 };
 
-// Display detail page for a specific Language.
-exports.language_detail = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language detail: ' + req.params.id);
+// Display detail page for a specific Editorial.
+exports.editorial_detail = function(req, res) {
+    res.send('NOT IMPLEMENTED: Editorial detail: ' + req.params.id);
 };
 
-// Display Language create form on GET.
-exports.language_create_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language create GET');
+// Display Editorial create form on GET.
+exports.editorial_create_get = function(req, res) {
+    res.send('NOT IMPLEMENTED: Editorial create GET');
 };
 
-// Handle Language create on POST.
-exports.language_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language create POST');
+// Handle Editorial create on POST.
+exports.editorial_create_post = function(req, res) {
+    res.send('NOT IMPLEMENTED: Editorial create POST');
 };
 
-// Display Language delete form on GET.
-exports.language_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language delete GET');
+// Display Editorial delete form on GET.
+exports.editorial_delete_get = function(req, res) {
+    res.send('NOT IMPLEMENTED: Editorial delete GET');
 };
 
-// Handle Language delete on POST.
-exports.language_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language delete POST');
+// Handle Editorial delete on POST.
+exports.editorial_delete_post = function(req, res) {
+    res.send('NOT IMPLEMENTED: Editorial delete POST');
 };
 
-// Display Language update form on GET.
-exports.language_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language update GET');
+// Display Editorial update form on GET.
+exports.editorial_update_get = function(req, res) {
+    res.send('NOT IMPLEMENTED: Editorial update GET');
 };
 
-// Handle Language update on POST.
-exports.language_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language update POST');
+// Handle Editorial update on POST.
+exports.editorial_update_post = function(req, res) {
+    res.send('NOT IMPLEMENTED: Editorial update POST');
 };
