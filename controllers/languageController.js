@@ -5,6 +5,8 @@ var async = require('async');
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
 
+const { body, validationResult } = require('express-validator/check');
+const { sanitizeBody } = require('express-validator/filter');
 // Display list of all Language.
 exports.language_list = function(req, res, next) {
 
