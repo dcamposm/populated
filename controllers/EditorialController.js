@@ -3,7 +3,13 @@ const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
 // Display list of all Editorial.
 exports.editorial_list = function(req, res) {
-    res.send('NOT IMPLEMENTED: Editorial list');
+    Editorial.find()
+    .sort([['name', 'ascending']])
+    .exec(function (err, list_editorials) {
+      if (err) { return next(err); }
+      // Successful, so render.
+      res.render('editorial_list', { title: 'Editorial List', editorial_list:  list_editorials});
+    });
 };
 
 // Display detail page for a specific Editorial.
