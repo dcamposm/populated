@@ -3,11 +3,13 @@ extends layout
 block content
 
   h1 Author: #{author.name}
+  h2 Detaills
   if author.date_of_death==NULL
-     p #{author.date_of_birth_formatted} - #{author.date_of_death_formatted}
+     p Years: #{author.date_of_birth_formatted} - #{author.date_of_death_formatted}
   else
-    p #{author.lifespan}
-  
+    p Years: #{author.lifespan}
+
+  p Country: #{author.country.name}
   div(style='margin-left:20px;margin-top:20px')
 
     h4 Books
