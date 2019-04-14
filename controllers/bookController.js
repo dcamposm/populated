@@ -33,46 +33,24 @@ exports.index = function(req, res) {
 
 
 // Display list of all books.
-exports.book_list = async function(req, res, next) {
-    try {
-
-        const [ results, itemCount ] = await Promise.all([
-          Book.find({}, 'title author ').limit(req.query.limit).skip(req.skip).lean().populate('author').exec(),
-          Book.count({})
-        ]);
-
-        const pageCount = Math.ceil(itemCount / req.query.limit);
-
-
-        res.render('book_list', {
-        title: 'Book List', book_list:  results,
-        pageCount,
-        itemCount,
-        pages: paginate.getArrayPages(req)(3, pageCount, req.query.page)
-    });
-
-      } catch (err) {
-        next(err);
-      }
-
-  /*Book.find({}, 'title author ')
+exports.book_list = function(req, res, next) {
+  Book.find({}, 'title author ')
     .limit(req.query.limit)
     .skip(req.skip)
-    .lean()
     .populate('author')
-    .exec(function (err, list_books) {
+    .exec(async function (err, list_books) {
       if (err) { return next(err); }
       // Successful, so render
-      const [ list_books, itemCount ] = await Promise.all([
-          Book.find({}).limit(req.query.limit).skip(req.skip).lean().exec(),
+      var [itemCount ] = await Promise.all([
           Book.count({})
         ]);
-      const pageCount = Math.ceil(itemCount / req.query.limit);
+
+      var pageCount = Math.ceil(itemCount / req.query.limit);
       res.render('book_list', { title: 'Book List', book_list:  list_books,
         pageCount,
         itemCount,
         pages: paginate.getArrayPages(req)(3, pageCount, req.query.page)});
-    });*/
+    });
 
 };
 

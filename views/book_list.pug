@@ -2,7 +2,8 @@ extends layout
 
 block content
   h1= title
-  
+  a(href=paginate.href({ sort: 'title' })) Sort by title
+
   ul
     each book in book_list
       li 
