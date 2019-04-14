@@ -11,6 +11,7 @@ exports.edition_list = function(req, res, next) {
   Edition.find({}, 'editorial book year' )
     .populate('editorial')
     .populate('book')
+  	.sort( { 'book': 1 } )
     .exec(function (err, edition_list) {
       if (err) { return next(err); }
       // Successful, so render
