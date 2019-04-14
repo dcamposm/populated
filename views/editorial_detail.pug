@@ -4,4 +4,23 @@ block content
 
   h1 Editorial: #{editorial.name}
 
-  h2 Country: #{editorial.country.name}
+  div(style='margin-left:20px;margin-top:20px')
+    
+    dl
+      each edition in editions
+        dt 
+          p #[strong Book name:] 
+            
+          p #[strong Editorial name:] #{edition.editorial.name} 
+          p #[strong Year:] #{edition.year_formatted}
+          br
+
+      else
+        p This language has no books
+
+    hr
+    
+    p
+      a(href=edition.url+'/delete') Delete Edition
+    p
+      a(href=edition.url+'/update') Update Edition
