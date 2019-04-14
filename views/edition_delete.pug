@@ -1,0 +1,26 @@
+extends layout
+
+block content
+
+  h1 #{title}: #{edition._id}
+  
+  p #[strong Book name:] 
+    a(href=edition.book.url) #{edition.book.title}
+  p #[strong Editorial name:] 
+    a(href=edition.editorial.url) #{edition.editorial.name} 
+  p #[strong Year:] #{edition.year_formatted}
+  p #[strong Languages:]&nbsp;
+    each val, index in edition.language
+      a(href=val.url) #{val.name}
+      if index < edition.language.length - 1
+        |, 
+
+  hr
+
+  p Do you really want to delete this Book?
+    
+    form(method='POST' action='')
+      div.form-group
+        input#id.form-control(type='hidden',name='id', required='true', value=edition._id )
+
+      button.btn.btn-primary(type='submit') Delete
