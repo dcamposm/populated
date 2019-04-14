@@ -4,18 +4,28 @@ var async = require('async');
 
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
-
+const paginate = require('express-paginate');
+var async = require('async');
 // Display list of all Genre.
 exports.genre_list = function(req, res, next) {
 
   Genre.find()
+    .limit(req.query.limit)
+    .skip(req.skip)
     .sort([['name', 'ascending']])
-    .exec(function (err, list_genres) {
+    .exec(async function (err, list_genres) {
       if (err) { return next(err); }
-      // Successful, so render.
-      res.render('genre_list', { title: 'Genre List', genre_list:  list_genres});
-    });
+      var [itemCount ] = await Promise.all([
+          Genre.count({})
+        ]);
 
+        var pageCount = Math.ceil(itemCount / req.query.limit);
+      // Successful, so render.
+      res.render('genre_list', { title: 'Genre List', genre_list:  list_genres,
+            pageCount,
+            itemCount,
+            pages: paginate.getArrayPages(req)(3, pageCount, req.query.page)});
+    });
 };
 
 // Display detail page for a specific Genre.
