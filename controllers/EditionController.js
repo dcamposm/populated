@@ -27,14 +27,9 @@ exports.edition_detail = function(req, res, next) {
       editions: function(callback) {
 
           Edition.findById(req.params.id)
-            .populate('language')
             .populate('editorial')
+            .populate('book')
             .exec(callback);
-      },
-      book_instance: function(callback) {
-
-        BookInstance.find({ 'book': req.params.id })
-        .exec(callback);
       },
   }, function(err, results) {
       if (err) { return next(err); }
@@ -44,7 +39,7 @@ exports.edition_detail = function(req, res, next) {
           return next(err);
       }
       // Successful, so render.
-      res.render('edition_detail', { title: 'Title', edition:  results.edition, book_instances: results.book_instance } );
+      res.render('edition_detail', { title: 'Title', edition:  results.edition } );
   });
 
 };

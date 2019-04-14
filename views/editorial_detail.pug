@@ -8,9 +8,7 @@ block content
     
     dl
       each edition in editions
-        dt 
-          p #[strong Book name:] 
-            
+        dt
           p #[strong Editorial name:] #{edition.editorial.name} 
           p #[strong Year:] #{edition.year_formatted}
           br
