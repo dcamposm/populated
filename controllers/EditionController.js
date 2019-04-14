@@ -46,7 +46,27 @@ exports.edition_detail = function(req, res, next) {
 
 // Display Edition create form on GET.
 exports.edition_create_get = function(req, res, next) {
-    res.send('NOT IMPLEMENTED: Edition create GET');
+
+    // Get all editorials, books and languages, which we can use for adding to our edition.
+    async.parallel({
+        editorials: function(callback) {
+            Editorial.find(callback);
+        },
+        books: function(callback) {
+            Book.find(callback);
+        },
+        languages: function(callback) {
+            Language.find(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        res.render('edition_form', {
+        		title: 'Create Edition',
+        		editorials: results.editorials,
+        		books: results.books,
+        		languages: results.languages
+    		});
+    });
 };
 
 // Handle Edition create on POST.
