@@ -1,0 +1,27 @@
+extends layout
+
+block content
+
+  h1 Edition: #{edition.name}
+
+  div(style='margin-left:20px;margin-top:20px')
+    
+    dl
+        dt
+          p #[strong Book name:] 
+            a(href=edition.book.url) #{edition.book.title}
+          p #[strong Editorial name:] 
+            a(href=edition.editorial.url) #{edition.editorial.name} 
+          p #[strong Year:] #{edition.year_formatted}
+          p #[strong Languages:]&nbsp;
+    each val, index in edition.language
+      a(href=val.url) #{val.name}
+      if index < edition.language.length - 1
+        |, 
+
+    hr
+    
+    p
+      a(href=edition.url+'/delete') Delete Edition
+    p
+      a(href=edition.url+'/update') Update Edition
