@@ -4,28 +4,18 @@ var Book = require('../models/book');
 var Language = require('../models/language');
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
-const paginate = require('express-paginate');
 var async = require('async');
 // Display list of all Edition.
 exports.edition_list = function(req, res, next) {
 
   Edition.find({}, 'editorial book year' )
-  	.limit(req.query.limit)
-    .skip(req.skip)
     .populate('editorial')
     .populate('book')
-    .exec(async function (err, edition_list) {
-      	if (err) { return next(err); }
-      	var [itemCount ] = await Promise.all([
-          Edition.count({})
-        ]);
-
-        var pageCount = Math.ceil(itemCount / req.query.limit);
-      // Successful, so render
-      res.render('edition_list', { title: 'Edition List', edition_list:  edition_list,
-            pageCount,
-            itemCount,
-            pages: paginate.getArrayPages(req)(3, pageCount, req.query.page)});
+  	.sort( { 'book': 1 } )
+    .exec(function (err, edition_list) {
+		if (err) { return next(err); }
+		// Successful, so render
+		res.render('edition_list', { title: 'Edition List', edition_list:  edition_list});
     });
 };
 
