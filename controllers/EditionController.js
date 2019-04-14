@@ -4,6 +4,7 @@ var Book = require('../models/book');
 var Language = require('../models/language');
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
+var async = require('async');
 
 // Display list of all Edition.
 exports.edition_list = function(req, res, next) {
