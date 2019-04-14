@@ -6,8 +6,8 @@ const { sanitizeBody } = require('express-validator/filter');
 // Display list of all Edition.
 exports.edition_list = function(req, res, next) {
 
-  Edition.find({}, 'title author ')
-    .populate('id_editorial')
+  Edition.find({}, 'editorial' )
+    .populate('editorial')
     .exec(function (err, edition_list) {
       if (err) { return next(err); }
       // Successful, so render

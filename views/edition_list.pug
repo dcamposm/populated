@@ -6,7 +6,8 @@ block content
   ul
     each edition in edition_list
       li 
-        a(href=edition.url) #{edition.name} 
+        a(href=edition.url) #{edition._id} #{edition.editorial.name}
+        |  (#{edition.editorial.name})
 
     else
       li There are no books.
