@@ -154,18 +154,35 @@ exports.edition_delete_get = function(req, res, next) {
       },
   }, function(err, results) {
       if (err) { return next(err); }
-      if (results.book==null) { // No results.
-          res.redirect('/catalog/books');
+      if (results.edition==null) { // No results.
+          res.redirect('/catalog/editions');
       }
       // Successful, so render.
-      res.render('book_delete', { title: 'Delete Book', book: results.book, book_instances: results.book_bookinstances } );
+      res.render('edition_delete', { title: 'Delete Edition', edition: results.edition } );
   });
 
 };
 
 // Handle Edition delete on POST.
 exports.edition_delete_post = function(req, res, next) {
-    res.send('NOT IMPLEMENTED: Edition delete POST');
+
+    async.parallel({
+        edition: function(callback) {
+            Edition.findById(req.body.id).populate('editorial').populate('book').populate('language').exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        // Success
+        else {
+            Edition.findByIdAndRemove(req.body.id, function deleteEdition(err) {
+                if (err) { return next(err); }
+                // Success - got to edition list.
+                res.redirect('/catalog/editions');
+            });
+
+        }
+    });
+
 };
 
 // Display Edition update form on GET.

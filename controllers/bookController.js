@@ -2,6 +2,10 @@ var Book = require('../models/book');
 var Author = require('../models/author');
 var Genre = require('../models/genre');
 var BookInstance = require('../models/bookinstance');
+var Editorial = require('../models/editorial');
+var Edition = require('../models/edition');
+var Language = require('../models/language');
+var Country = require('../models/country');
 
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
@@ -25,6 +29,18 @@ exports.index = function(req, res) {
         },
         genre_count: function(callback) {
             Genre.count(callback);
+        },
+        editorial_count: function(callback) {
+            Editorial.count(callback);
+        },
+        edition_count: function(callback) {
+            Edition.count(callback);
+        },
+        language_count: function(callback) {
+            Language.count(callback);
+        },
+        country_count: function(callback) {
+            Country.count(callback);
         },
     }, function(err, results) {
         res.render('index', { title: 'Local Library Home', error: err, data: results });
