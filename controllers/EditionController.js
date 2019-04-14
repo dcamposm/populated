@@ -33,11 +33,12 @@ exports.edition_list = function(req, res, next) {
 exports.edition_detail = function(req, res, next) {
     
   async.parallel({
-      book: function(callback) {
+      edition: function(callback) {
 
-          Book.findById(req.params.id)
-            .populate('author')
-            .populate('genre')
+          Edition.findById(req.params.id)
+            .populate('editorial')
+            .populate('book')
+            .populate('language')
             .exec(callback);
       },
       book_instance: function(callback) {
