@@ -172,7 +172,39 @@ exports.edition_delete_post = function(req, res, next) {
 
 // Display Edition update form on GET.
 exports.edition_update_get = function(req, res, next) {
-    res.send('NOT IMPLEMENTED: Edition update GET');
+    
+    // Get book, authors and genres for form.
+    async.parallel({
+        edition: function(callback) {
+            Edition.findById(req.params.id).populate('editorial').populate('book').populate('language').exec(callback);
+        },
+        editorials: function(callback) {
+            Editorial.find(callback);
+        },
+        books: function(callback) {
+            Book.find(callback);
+        },
+        languages: function(callback) {
+            Language.find(callback);
+        },
+        }, function(err, results) {
+            if (err) { return next(err); }
+            if (results.edition==null) { // No results.
+                var err = new Error('Edition not found');
+                err.status = 404;
+                return next(err);
+            }
+            // Success.
+            // Mark our selected genres as checked.
+            for (var all_g_iter = 0; all_g_iter < results.languages.length; all_g_iter++) {
+                for (var edition_g_iter = 0; edition_g_iter < results.edition.language.length; edition_g_iter++) {
+                    if (results.languages[all_g_iter]._id.toString()==results.edition.language[edition_g_iter]._id.toString()) {
+                        results.languages[all_g_iter].checked='true';
+                    }
+                }
+            }
+            res.render('edition_form', { title: 'Update Edition', editorials:results.editorials, books:results.books,languages:results.languages, edition: results.edition });
+        });
 };
 
 // Handle Edition update on POST.
