@@ -5,18 +5,28 @@ var Country = require('../models/country')
 
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
-
+const paginate = require('express-paginate');
+var async = require('async');
 // Display list of all Authors.
 exports.author_list = function (req, res, next) {
 
     Author.find()
+        .limit(req.query.limit)
+        .skip(req.skip)
         .sort([['family_name', 'ascending']])
-        .exec(function (err, list_authors) {
+        .exec(async function (err, list_authors) {
             if (err) { return next(err); }
             // Successful, so render.
-            res.render('author_list', { title: 'Author List', author_list: list_authors });
-        })
+            var [itemCount ] = await Promise.all([
+              Author.count({})
+            ]);
 
+            var pageCount = Math.ceil(itemCount / req.query.limit);
+            res.render('author_list', { title: 'Author List', author_list: list_authors,
+                pageCount,
+                itemCount,
+                pages: paginate.getArrayPages(req)(3, pageCount, req.query.page) });
+        });
 };
 
 // Display detail page for a specific Author.

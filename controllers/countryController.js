@@ -5,17 +5,28 @@ var async = require('async');
 
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
+const paginate = require('express-paginate');
+
 // Display list of all Country.
 exports.country_list = function(req, res, next) {
 
     Country.find()
+        .limit(req.query.limit)
+        .skip(req.skip)
         .sort([['name', 'ascending']])
-        .exec(function (err, list_countrys) {
+        .exec(async function (err, list_countrys) {
             if (err) { return next(err); }
-            // Successful, so render.
-            res.render('country_list', { title: 'Country List', country_list:  list_countrys});
-        });
+            var [itemCount ] = await Promise.all([
+              Country.count({})
+            ]);
 
+            var pageCount = Math.ceil(itemCount / req.query.limit);
+            // Successful, so render.
+            res.render('country_list', { title: 'Country List', country_list:  list_countrys,
+                pageCount,
+                itemCount,
+                pages: paginate.getArrayPages(req)(3, pageCount, req.query.page)});
+        });
 };
 
 // Display detail page for a specific Country.

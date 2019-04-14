@@ -4,14 +4,27 @@ var async = require('async');
 
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
+const paginate = require('express-paginate');
+var async = require('async');
 // Display list of all Editorial.
 exports.editorial_list = function(req, res) {
     Editorial.find()
+    .limit(req.query.limit)
+    .skip(req.skip)
     .sort([['name', 'ascending']])
-    .exec(function (err, list_editorials) {
+    .exec(async function (err, list_editorials) {
       if (err) { return next(err); }
+
+      var [itemCount ] = await Promise.all([
+	      Country.count({})
+	    ]);
+
+	    var pageCount = Math.ceil(itemCount / req.query.limit);
       // Successful, so render.
-      res.render('editorial_list', { title: 'Editorial List', editorial_list:  list_editorials});
+      res.render('editorial_list', { title: 'Editorial List', editorial_list:  list_editorials,
+                pageCount,
+                itemCount,
+                pages: paginate.getArrayPages(req)(3, pageCount, req.query.page)});
     });
 };
 
