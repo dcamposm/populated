@@ -160,11 +160,57 @@ exports.language_delete_post = function(req, res, next) {
 };
 
 // Display Language update form on GET.
-exports.language_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language update GET');
+exports.language_update_get = function(req, res, next) {
+    
+  Language.findById(req.params.id, function(err, language) {
+      if (err) { return next(err); }
+      if (language==null) { // No results.
+          var err = new Error('Language not found');
+          err.status = 404;
+          return next(err);
+      }
+      // Success.
+      res.render('language_form', { title: 'Update Language', language: language });
+  });
+
 };
 
 // Handle Language update on POST.
-exports.language_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language update POST');
-};
+exports.language_update_post = [
+   
+    // Validate that the name field is not empty.
+    body('name', 'Language name required').isLength({ min: 1 }).trim(),
+    
+    // Sanitize (escape) the name field.
+    sanitizeBody('name').escape(),
+
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+
+        // Extract the validation errors from a request .
+        const errors = validationResult(req);
+
+    // Create a language object with escaped and trimmed data (and the old id!)
+        var language = new Language(
+          {
+          name: req.body.name,
+          _id: req.params.id
+          }
+        );
+
+
+        if (!errors.isEmpty()) {
+            // There are errors. Render the form again with sanitized values and error messages.
+            res.render('language_form', { title: 'Update Language', language: language, errors: errors.array()});
+        return;
+        }
+        else {
+            // Data from form is valid. Update the record.
+            Language.findByIdAndUpdate(req.params.id, language, {}, function (err,thelanguage) {
+                if (err) { return next(err); }
+                   // Successful - redirect to language detail page.
+                   res.redirect(thelanguage.url);
+                });
+        }
+    }
+];

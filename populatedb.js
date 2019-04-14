@@ -362,10 +362,10 @@ function createEdition(cb) {
           editionCreate(books[4], editorials[1], '2015', [languages[0],languages[1],languages[2]], callback)
         },
         function(callback) {
-          editionCreate(books[0], editorials[2], false, [languages[0],languages[2]], callback)
+          editionCreate(books[0], editorials[2], '2016', [languages[0],languages[2]], callback)
         },
         function(callback) {
-          editionCreate(books[1], editorials[2], false, [languages[0],languages[2]], callback)
+          editionCreate(books[1], editorials[2], '2015', [languages[0],languages[2]], callback)
         }
         ],
         // optional callback
