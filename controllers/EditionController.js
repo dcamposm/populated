@@ -74,6 +74,7 @@ exports.edition_create_get = function(req, res, next) {
         },
     }, function(err, results) {
         if (err) { return next(err); }
+        console.log(results.books);
         res.render('edition_form', {
         		title: 'Create Edition',
         		editorials: results.editorials,
@@ -84,9 +85,79 @@ exports.edition_create_get = function(req, res, next) {
 };
 
 // Handle Edition create on POST.
-exports.edition_create_post = function(req, res, next) {
-    res.send('NOT IMPLEMENTED: Edition create POST');
-};
+exports.edition_create_post = [
+    // Convert the language to an array.
+    (req, res, next) => {
+        if(!(req.body.language instanceof Array)){
+            if(typeof req.body.language==='undefined')
+            req.body.language=[];
+            else
+            req.body.language=new Array(req.body.language);
+        }
+        next();
+    },
+
+    // Validate fields.
+    body('editorial', 'Editorial must not be empty.').isLength({ min: 1 }).trim(),
+    body('book', 'Book must not be empty.').isLength({ min: 1 }).trim(),
+    body('year', 'Year must not be empty.').isLength({ min: 1 }).trim(),
+  
+    // Sanitize fields.
+    sanitizeBody('*').escape(),
+    sanitizeBody('language.*').escape(),
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+        
+
+        // Extract the validation errors from a request.
+        const errors = validationResult(req);
+
+        // Create a Edition object with escaped and trimmed data.
+        var edition = new Edition(
+          { editorial: req.body.editorial,
+            book: req.body.book,
+            year: req.body.year,
+            language: req.body.language
+           });
+
+        if (!errors.isEmpty()) {
+            // There are errors. Render form again with sanitized values/error messages.
+
+            // Get all authors and editions for form.
+            async.parallel({
+                editorials: function(callback) {
+                    Editorial.find(callback);
+                },
+                books: function(callback) {
+                    Book.find(callback);
+                },
+                languages: function(callback) {
+                    Language.find(callback);
+                },
+            }, function(err, results) {
+                if (err) { return next(err); }
+
+                // Mark our selected languages as checked.
+                for (let i = 0; i < results.languages.length; i++) {
+                    if (edition.language.indexOf(results.languages[i]._id) > -1) {
+                        results.languages[i].checked='true';
+                    }
+                }
+                res.render('book_form', { title: 'Create Edition',editorials:results.editorials,books:results.books, languages:results.languages, edition: edition, errors: errors.array() });
+            });
+            return;
+        }
+        else {
+            // Data from form is valid. Save book.
+            edition.save(function (err) {
+                if (err) { return next(err); }
+                   // Successful - redirect to new book record.
+                   res.redirect(edition.url);
+                });
+        }
+    }
+];
+
 
 // Display Edition delete form on GET.
 exports.edition_delete_get = function(req, res, next) {
