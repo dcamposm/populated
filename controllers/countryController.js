@@ -183,10 +183,56 @@ exports.country_delete_post = function(req, res, next) {
 
 // Display Country update form on GET.
 exports.country_update_get = function(req, res, next) {
-    res.send('NOT IMPLEMENTED: Country update GET');
+
+    Country.findById(req.params.id, function(err, country) {
+        if (err) { return next(err); }
+        if (country==null) { // No results.
+            var err = new Error('Country not found');
+            err.status = 404;
+            return next(err);
+        }
+        // Success.
+        res.render('country_form', { title: 'Update Country', country: country });
+    });
+    
 };
 
 // Handle Country update on POST.
-exports.country_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language update POST');
-};
+exports.country_update_post = [
+   
+    // Validate that the name field is not empty.
+    body('name', 'Country name required').isLength({ min: 1 }).trim(),
+    
+    // Sanitize (escape) the name field.
+    sanitizeBody('name').escape(),
+
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+
+        // Extract the validation errors from a request .
+        const errors = validationResult(req);
+
+    // Create a country object with escaped and trimmed data (and the old id!)
+        var country = new Country(
+          {
+          name: req.body.name,
+          _id: req.params.id
+          }
+        );
+
+
+        if (!errors.isEmpty()) {
+            // There are errors. Render the form again with sanitized values and error messages.
+            res.render('genre_form', { title: 'Update Country', country: country, errors: errors.array()});
+        return;
+        }
+        else {
+            // Data from form is valid. Update the record.
+            Country.findByIdAndUpdate(req.params.id, country, {}, function (err,thegenre) {
+                if (err) { return next(err); }
+                   // Successful - redirect to country detail page.
+                   res.redirect(thegenre.url);
+                });
+        }
+    }
+];
