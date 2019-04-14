@@ -3,13 +3,13 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+var paginate = require('express-paginate');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var catalogRouter = require('./routes/catalog');
 
 var app = express();
-
+app.use(paginate.middleware(5, 10));
 //Set up mongoose connection
 var mongoose = require('mongoose');
 var mongoDB = 'mongodb://127.0.0.1/libreria';

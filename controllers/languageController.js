@@ -6,18 +6,28 @@ var async = require('async');
 
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
+const paginate = require('express-paginate');
 
 // Display list of all Language.
 exports.language_list = function(req, res, next) {
 
     Language.find()
+    .limit(req.query.limit)
+    .skip(req.skip)
     .sort([['name', 'ascending']])
-    .exec(function (err, list_languages) {
+    .exec(async function (err, list_languages) {
       if (err) { return next(err); }
-      // Successful, so render.
-      res.render('language_list', { title: 'Language List', language_list:  list_languages});
-    });
+       	var [itemCount ] = await Promise.all([
+              Language.count({})
+            ]);
 
+        var pageCount = Math.ceil(itemCount / req.query.limit);
+      // Successful, so render.
+      res.render('language_list', { title: 'Language List', language_list:  list_languages,
+                pageCount,
+                itemCount,
+                pages: paginate.getArrayPages(req)(3, pageCount, req.query.page)});
+    });
 };
 
 // Display detail page for a specific Language.

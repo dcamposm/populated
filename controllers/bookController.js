@@ -5,7 +5,7 @@ var BookInstance = require('../models/bookinstance');
 
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
-
+const paginate = require('express-paginate');
 var async = require('async');
 
 exports.index = function(req, res) {
@@ -34,13 +34,22 @@ exports.index = function(req, res) {
 
 // Display list of all books.
 exports.book_list = function(req, res, next) {
-
   Book.find({}, 'title author ')
+    .limit(req.query.limit)
+    .skip(req.skip)
     .populate('author')
-    .exec(function (err, list_books) {
+    .exec(async function (err, list_books) {
       if (err) { return next(err); }
       // Successful, so render
-      res.render('book_list', { title: 'Book List', book_list:  list_books});
+      var [itemCount ] = await Promise.all([
+          Book.count({})
+        ]);
+
+      var pageCount = Math.ceil(itemCount / req.query.limit);
+      res.render('book_list', { title: 'Book List', book_list:  list_books,
+        pageCount,
+        itemCount,
+        pages: paginate.getArrayPages(req)(3, pageCount, req.query.page)});
     });
 
 };
