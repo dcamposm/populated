@@ -3,26 +3,3 @@
   padding: 0;
   list-style: none;
 }
-
-
-#sortMyTable {
-  border-spacing: 0;
-  width: 100%;
-  border: 1px solid #ddd;
-}
-
-#sortMyTable > tbody > tr > th {
-  cursor: pointer;
-  text-align: left;
-  padding: 16px;
-  background-color: lightcyan;
-}
-
-#sortMyTable > tbody > tr > td {
-  text-align: left;
-  padding: 16px;
-}
-
-#sortMyTable > tbody > tr:nth-child(even) {
-  background-color: #f2f2f2
-}
