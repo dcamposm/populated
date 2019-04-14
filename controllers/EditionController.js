@@ -4,28 +4,18 @@ var Book = require('../models/book');
 var Language = require('../models/language');
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
-const paginate = require('express-paginate');
 var async = require('async');
 // Display list of all Edition.
 exports.edition_list = function(req, res, next) {
 
   Edition.find({}, 'editorial book year' )
-  	.limit(req.query.limit)
-    .skip(req.skip)
     .populate('editorial')
     .populate('book')
-    .exec(async function (err, edition_list) {
-      	if (err) { return next(err); }
-      	var [itemCount ] = await Promise.all([
-          Edition.count({})
-        ]);
-
-        var pageCount = Math.ceil(itemCount / req.query.limit);
-      // Successful, so render
-      res.render('edition_list', { title: 'Edition List', edition_list:  edition_list,
-            pageCount,
-            itemCount,
-            pages: paginate.getArrayPages(req)(3, pageCount, req.query.page)});
+  	.sort( { 'book': 1 } )
+    .exec(function (err, edition_list) {
+		if (err) { return next(err); }
+		// Successful, so render
+		res.render('edition_list', { title: 'Edition List', edition_list:  edition_list});
     });
 };
 
@@ -110,8 +100,8 @@ exports.edition_create_post = [
 
         // Create a Edition object with escaped and trimmed data.
         var edition = new Edition(
-          { editorial: req.body.editorial,
-            book: req.body.book,
+          { book: req.body.book,
+            editorial: req.body.editorial,
             year: req.body.year,
             language: req.body.language
            });
@@ -233,6 +223,79 @@ exports.edition_update_get = function(req, res, next) {
 };
 
 // Handle Edition update on POST.
-exports.edition_update_post = function(req, res, next) {
-    res.send('NOT IMPLEMENTED: Edition update POST');
-};
+exports.edition_update_post = [
+
+    // Convert the language to an array.
+    (req, res, next) => {
+        if(!(req.body.language instanceof Array)){
+            if(typeof req.body.language==='undefined')
+            req.body.language=[];
+            else
+            req.body.language=new Array(req.body.language);
+        }
+        next();
+    },
+   
+    // Validate fields.
+    body('editorial', 'Editorial must not be empty.').isLength({ min: 1 }).trim(),
+    body('book', 'Book must not be empty.').isLength({ min: 1 }).trim(),
+    body('year', 'Year must not be empty.').isLength({ min: 1 }).trim(),
+
+    // Sanitize fields.
+    sanitizeBody('editorial').escape(),
+    sanitizeBody('book').escape(),
+    sanitizeBody('year').escape(),
+    sanitizeBody('language.*').escape(),
+
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+
+        // Extract the validation errors from a request.
+        const errors = validationResult(req);
+
+        // Create a Book object with escaped/trimmed data and old id.
+        var edition = new Edition(
+          { book: req.body.book,
+            editorial: req.body.editorial,
+            year: req.body.year,
+            language: (typeof req.body.language==='undefined') ? [] : req.body.language,
+            _id:req.params.id // This is required, or a new ID will be assigned!
+           });
+
+        if (!errors.isEmpty()) {
+            // There are errors. Render form again with sanitized values/error messages.
+
+            // Get all authors and languages for form
+            async.parallel({
+                books: function(callback) {
+                    Book.find(callback);
+                },
+                editorials: function(callback) {
+                    Editorial.find(callback);
+                },
+                languages: function(callback) {
+                    Language.find(callback);
+                },
+            }, function(err, results) {
+                if (err) { return next(err); }
+
+                // Mark our selected languages as checked.
+                for (let i = 0; i < results.languages.length; i++) {
+                    if (edition.language.indexOf(results.languages[i]._id) > -1) {
+                        results.languages[i].checked='true';
+                    }
+                }
+                res.render('edition_form', { title: 'Update Edition',books:results.books, editorials:results.editorials, languages:results.languages,edition: edition, errors: errors.array() });
+            });
+            return;
+        }
+        else {
+            // Data from form is valid. Update the record.
+            Edition.findByIdAndUpdate(req.params.id, edition, {}, function (err,thebook) {
+                if (err) { return next(err); }
+                   // Successful - redirect to book detail page.
+                   res.redirect(edition.url);
+                });
+        }
+    }
+];
