@@ -117,6 +117,35 @@ exports.country_create_post = [
 
 // Display Country delete form on GET.
 exports.country_delete_get = function(req, res, next) {
+
+    async.parallel({
+        country: function(callback) {
+            Country.findById(req.params.id).exec(callback);
+        },
+        country_authors: function(callback) {
+            Author.find({ 'country': req.params.id }).exec(callback);
+        },
+        country_editorials: function(callback) {
+            Editorial.find({ 'country': req.params.id }).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.country==null) { // No results.
+            res.redirect('/catalog/countries');
+        }
+        // Successful, so render.
+        res.render('country_delete', { 
+                    title: 'Delete Country',
+                    country: results.country,
+                    country_authors: results.country_authors,
+                    country_editorials: results.country_editorials
+                });
+    });
+
+};
+
+// Handle Country delete on POST.
+exports.country_delete_post = function(req, res, next) {
     async.parallel({
         country: function(callback) {
             Country.findById(req.params.id).exec(callback);
@@ -142,39 +171,10 @@ exports.country_delete_get = function(req, res, next) {
         }
         else {
             // Country has no books. Delete object and redirect to the list of countries.
-            Country.findByIdAndRemove(req.body.id, function deleteAuthor(err) {
+            Country.findByIdAndRemove(req.body.id, function deleteCountry(err) {
                 if (err) { return next(err); }
                 // Success - go to countries list.
                 res.redirect('/catalog/countries');
-            });
-
-        }
-    });
-};
-
-// Handle Country delete on POST.
-exports.country_delete_post = function(req, res, next) {
-    async.parallel({
-        genre: function(callback) {
-            Genre.findById(req.params.id).exec(callback);
-        },
-        country_authors: function(callback) {
-            Book.find({ 'genre': req.params.id }).exec(callback);
-        },
-    }, function(err, results) {
-        if (err) { return next(err); }
-        // Success
-        if (results.genre_books.length > 0) {
-            // Genre has books. Render in same way as for GET route.
-            res.render('genre_delete', { title: 'Delete Genre', genre: results.genre, genre_books: results.genre_books } );
-            return;
-        }
-        else {
-            // Genre has no books. Delete object and redirect to the list of genres.
-            Genre.findByIdAndRemove(req.body.id, function deleteGenre(err) {
-                if (err) { return next(err); }
-                // Success - go to genres list.
-                res.redirect('/catalog/genres');
             });
 
         }

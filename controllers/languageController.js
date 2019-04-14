@@ -51,23 +51,112 @@ exports.language_detail = function(req, res, next) {
 };
 
 // Display Language create form on GET.
-exports.language_create_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language create GET');
+exports.language_create_get = function(req, res, next) {
+    res.render('language_form', { title: 'Create Language'});
 };
 
 // Handle Language create on POST.
-exports.language_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language create POST');
-};
+exports.language_create_post = [
+
+    // Validate that the name field is not empty.
+    body('name', 'Language name required').isLength({ min: 1 }).trim(),
+
+    // Sanitize (trim) the name field.
+    sanitizeBody('name').escape(),
+
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+
+        // Extract the validation errors from a request.
+        const errors = validationResult(req);
+
+        // Create a language object with escaped and trimmed data.
+        var language = new Language(
+          { name: req.body.name }
+        );
+
+
+        if (!errors.isEmpty()) {
+            // There are errors. Render the form again with sanitized values/error messages.
+            res.render('language_form', { title: 'Create Language', language: language, errors: errors.array()});
+        return;
+        }
+        else {
+            // Data from form is valid.
+            // Check if Language with same name already exists.
+            Language.findOne({ 'name': req.body.name })
+                .exec( function(err, found_language) {
+                     if (err) { return next(err); }
+
+                     if (found_language) {
+                         // Language exists, redirect to its detail page.
+                         res.redirect(found_language.url);
+                     }
+                     else {
+
+                         language.save(function (err) {
+                           if (err) { return next(err); }
+                           // Language saved. Redirect to language detail page.
+                           res.redirect(language.url);
+                         });
+
+                     }
+
+                 });
+        }
+    }
+];
 
 // Display Language delete form on GET.
-exports.language_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language delete GET');
+exports.language_delete_get = function(req, res, next) {
+    
+  async.parallel({
+        language: function(callback) {
+            Language.findById(req.params.id).exec(callback);
+        },
+        language_edition: function(callback) {
+            Edition.find({ 'language': req.params.id }).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.language==null) { // No results.
+            res.redirect('/catalog/languages');
+        }
+        // Successful, so render.
+        res.render('language_delete', { title: 'Delete Language', language: results.language, language_edition: results.language_edition } );
+    });
+
 };
 
 // Handle Language delete on POST.
-exports.language_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Language delete POST');
+exports.language_delete_post = function(req, res, next) {
+
+    async.parallel({
+        language: function(callback) {
+            Language.findById(req.params.id).exec(callback);
+        },
+        language_edition: function(callback) {
+            Edition.find({ 'language': req.params.id }).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        // Success
+        if (results.language_edition.length > 0) {
+            // Language has edition. Render in same way as for GET route.
+            res.render('language_delete', { title: 'Delete Language', language: results.language, language_edition: results.language_edition } );
+            return;
+        }
+        else {
+            // Language has no editions. Delete object and redirect to the list of languages.
+            Language.findByIdAndRemove(req.body.id, function deleteLanguage(err) {
+                if (err) { return next(err); }
+                // Success - go to languages list.
+                res.redirect('/catalog/languages');
+            });
+
+        }
+    });
+
 };
 
 // Display Language update form on GET.
