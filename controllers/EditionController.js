@@ -41,20 +41,15 @@ exports.edition_detail = function(req, res, next) {
             .populate('language')
             .exec(callback);
       },
-      book_instance: function(callback) {
-
-        BookInstance.find({ 'book': req.params.id })
-        .exec(callback);
-      },
   }, function(err, results) {
       if (err) { return next(err); }
-      if (results.book==null) { // No results.
-          var err = new Error('Book not found');
+      if (results.edition==null) { // No results.
+          var err = new Error('Edition not found');
           err.status = 404;
           return next(err);
       }
       // Successful, so render.
-      res.render('book_detail', { title: 'Title', book:  results.book, book_instances: results.book_instance } );
+      res.render('edition_detail', { title: 'Title', edition:  results.edition } );
   });
 
 };
@@ -162,7 +157,20 @@ exports.edition_create_post = [
 
 // Display Edition delete form on GET.
 exports.edition_delete_get = function(req, res, next) {
-    res.send('NOT IMPLEMENTED: Edition delete GET');
+    
+  async.parallel({
+      edition: function(callback) {
+          Edition.findById(req.params.id).populate('editorial').populate('book').populate('language').exec(callback);
+      },
+  }, function(err, results) {
+      if (err) { return next(err); }
+      if (results.book==null) { // No results.
+          res.redirect('/catalog/books');
+      }
+      // Successful, so render.
+      res.render('book_delete', { title: 'Delete Book', book: results.book, book_instances: results.book_bookinstances } );
+  });
+
 };
 
 // Handle Edition delete on POST.
