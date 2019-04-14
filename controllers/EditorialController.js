@@ -16,7 +16,7 @@ exports.editorial_list = function(req, res) {
       if (err) { return next(err); }
 
       var [itemCount ] = await Promise.all([
-	      Country.count({})
+	      Editorial.count({})
 	    ]);
 
 	    var pageCount = Math.ceil(itemCount / req.query.limit);
