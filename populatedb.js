@@ -359,18 +359,6 @@ function createEdition(cb) {
           editionCreate(books[3], editorials[1], '2016', [languages[0],languages[1],languages[2]], callback)
         },
         function(callback) {
-          editionCreate(books[3], editorials[1], '2016', [languages[0],languages[1],languages[2]], callback)
-        },
-        function(callback) {
-          editionCreate(books[3], editorials[1], '2016', [languages[0],languages[1],languages[2]], callback)
-        },
-        function(callback) {
-          editionCreate(books[4], editorials[1], '2015', [languages[0],languages[1],languages[2]], callback)
-        },
-        function(callback) {
-          editionCreate(books[4], editorials[1], '2015', [languages[0],languages[1],languages[2]], callback)
-        },
-        function(callback) {
           editionCreate(books[4], editorials[1], '2015', [languages[0],languages[1],languages[2]], callback)
         },
         function(callback) {
