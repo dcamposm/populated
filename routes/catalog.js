@@ -7,8 +7,8 @@ var author_controller = require('../controllers/authorController');
 var genre_controller = require('../controllers/genreController');
 var book_instance_controller = require('../controllers/bookinstanceController');
 var country_controller = require('../controllers/countryController');
-var edition_controller = require('../controllers/editionController');
-var editorial_controller = require('../controllers/editorialController');
+var edition_controller = require('../controllers/EditionController');
+var editorial_controller = require('../controllers/EditorialController');
 var language_controller = require('../controllers/languageController');
 /// BOOK ROUTES ///
 
