@@ -93,20 +93,98 @@ exports.editorial_create_post = function(req, res) {
 
 // Display Editorial delete form on GET.
 exports.editorial_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Editorial delete GET');
+    async.parallel({
+        editorial: function(callback) {
+            Editorial.findById(req.params.id).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.genre==null) { // No results.
+            res.redirect('/catalog/editorials');
+        }
+        // Successful, so render.
+        res.render('editorial_delete', { title: 'Delete Editorial', editorial: results.editorial } );
+    });
 };
 
 // Handle Editorial delete on POST.
 exports.editorial_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Editorial delete POST');
+    async.parallel({
+        editorial: function(callback) {
+            Editorial.findById(req.params.id).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        // Success
+        else {
+            // Genre has no books. Delete object and redirect to the list of editorial.
+            Editorial.findByIdAndRemove(req.body.id, function deleteEditorial(err) {
+                if (err) { return next(err); }
+                // Success - go to editorial list.
+                res.redirect('/catalog/editorials');
+            });
+
+        }
+    });
 };
 
 // Display Editorial update form on GET.
 exports.editorial_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Editorial update GET');
+    async.parallel({
+        editorial: function(callback) {
+            Editorial.findById(req.params.id).populate('country').exec(callback);
+        },
+        countries: function(callback) {
+            Country.find(callback);
+        },
+        }, function(err, results) {
+            if (err) { return next(err); }
+            if (results.editorial==null) { // No results.
+                var err = new Error('Editorial not found');
+                err.status = 404;
+                return next(err);
+            }
+            res.render('editorial_form', { title: 'Update Editorial', editorial:results.editorial, countries:results.countries });
+        });
 };
 
 // Handle Editorial update on POST.
 exports.editorial_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Editorial update POST');
+    // Validate fields.
+    body('name', 'Editorial name required').isLength({ min: 1 }).trim(),
+    body('country', 'Country must not be empty.').isLength({ min: 1 }).trim(),
+
+    // Sanitize fields.
+    sanitizeBody('name').escape(),
+    sanitizeBody('country').escape(),
+
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+
+        // Extract the validation errors from a request.
+        const errors = validationResult(req);
+
+        // Create Author object with escaped and trimmed data (and the old id!)
+        var editorial = new Editorial(
+            {
+                name: req.body.name,
+                country: req.body.country,
+                _id: req.params.id
+            }
+        );
+
+        if (!errors.isEmpty()) {
+            // There are errors. Render the form again with sanitized values and error messages.
+            res.render('editorial_form', { title: 'Update Editorial', editorial: editorial, errors: errors.array() });
+            return;
+        }
+        else {
+            // Data from form is valid. Update the record.
+            Editorial.findByIdAndUpdate(req.params.id, editorial, {}, function (err, theauthor) {
+                if (err) { return next(err); }
+                // Successful - redirect to genre detail page.
+                res.redirect(editorial.url);
+            });
+        }
+    }
 };
