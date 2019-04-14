@@ -155,7 +155,7 @@ exports.edition_delete_get = function(req, res, next) {
   }, function(err, results) {
       if (err) { return next(err); }
       if (results.edition==null) { // No results.
-          res.redirect('/catalog/edition');
+          res.redirect('/catalog/editions');
       }
       // Successful, so render.
       res.render('edition_delete', { title: 'Delete Edition', edition: results.edition } );
