@@ -8,33 +8,31 @@ block content
 
   hr
   
-  if book_instances.length
+  if country_authors.length
   
     p #[strong Delete the following copies before attempting to delete this Book.]
   
     div(style='margin-left:20px;margin-top:20px')
 
-      h4 Copies
-    
-        each book_copy in book_instances
-          hr
-          if book_copy.status=='Available'
-            p.text-success #{book_copy.status}
-          else if book_copy.status=='Maintenance'
-            p.text-danger #{book_copy.status}
-          else
-            p.text-warning #{book_copy.status} 
-          p #[strong Imprint:] #{book_copy.imprint}
-          if book_copy.status!='Available'
-            p #[strong Due back:] #{book_copy.due_back}
-          p #[strong Id:] 
-            a(href=book_copy.url) #{book_copy._id}
+      h4 Authors
+      dl
+        each author in country_authors
+          p #[strong Name:] 
+            a(href=author.url) #{author.name}
+
+      hr
+
+      h4 Editorials
+      dl
+        each editorial in country_editorials
+          p #[strong Name:] 
+            a(href=editorial.url) #{editorial.name}
 
   else
-    p Do you really want to delete this Book?
+    p Do you really want to delete this #[strong Country]?
     
     form(method='POST' action='')
       div.form-group
-        input#id.form-control(type='hidden',name='id', required='true', value=book._id )
+        input#id.form-control(type='hidden',name='id', required='true', value=country._id )
 
       button.btn.btn-primary(type='submit') Delete
